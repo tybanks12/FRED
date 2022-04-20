@@ -1,0 +1,21 @@
+
+    while True:
+        r = sr.Recognizer()
+        ref_var = 0
+        with sr.Microphone() as source:
+            r.adjust_for_ambient_noise(source)
+            audio = r.listen(source)
+            x = r.recognize_google(audio)
+            print("you said " + x)
+            if x == "turn off":
+                ref_var = 1
+            elif x == "alarms":
+                ref_var = 2
+            elif x == "games":
+                ref_var = 3
+        if ref_var == 1:
+            window.close()
+        elif ref_var == 2:
+            Alarms()
+        elif ref_var == 3:
+            Games()
