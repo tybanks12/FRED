@@ -18,7 +18,7 @@ MONTHS = ["january", "february", "march", "april", "may", "june", "july", "augus
 DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 DAY_EXTENTIONS = ["rd", "th", "st", "nd"]
 
-WAKE_WORD = "hey fred"
+WAKE_WORD = "hey Fred"
 
 def speak(text):
     engine = pyttsx3.init()
@@ -59,12 +59,11 @@ def authenticate_google():
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'client_secret_271072488436-s5h29ofd9i3os4m0a3m15gouirvfol0t.apps.googleusercontent.com.json', SCOPES)
+                'client_secret_274759669346-lme6eb6pl80cbrbm6dcu7i4ngjtc3cg2.apps.googleusercontent.com.json', SCOPES)
             creds = flow.run_local_server(port=0)
 
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
-
     service = build('calendar', 'v3', credentials=creds)
 
     return service
@@ -85,7 +84,7 @@ def get_events(day, service):
     if not events:
         speak('No upcoming events found.')
     else:
-        speak(f"You have {len(events)} events on this day.")
+        speak("You have {len(events)} events on this day.")
 
         for event in events:
             start = event['start'].get('dateTime', event['start'].get('date'))
