@@ -9,7 +9,6 @@ import PySimpleGUI as sg
 import PIL as pl
 from PIL import ImageTk
 from datetime import datetime
-from playsound import playsound
 import time
 from pygame import mixer
 import threading
@@ -18,8 +17,6 @@ import pyttsx3
 import subprocess
 import pyjokes
 
-
-
 WAKE_WORD = "hey Fred"
 r = sr.Recognizer()
 
@@ -27,6 +24,7 @@ bar = False
 font = "Gotham"
 orange = "#FF8200"
 grey = "#58595B"
+black = "#000000"
 
 # Default colors
 sg.theme_background_color(grey)
@@ -37,6 +35,7 @@ sg.theme_input_text_color(orange)
 sg.theme_text_color(orange)
 hours_list = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
 min_list = [str(val).zfill(2) for val in range(60)]
+
 
 # get audio used for voice assistant
 def get_audio():
@@ -53,11 +52,13 @@ def get_audio():
 
     return said.lower()
 
+
 # text-to-speech
 def speak(text):
     engine = pyttsx3.init()
     engine.say(text)
     engine.runAndWait()
+
 
 # note taking
 def note(text):
@@ -71,31 +72,28 @@ def note(text):
 
 # create and run alarms window
 def Alarms():
-    bar = True
+    # Creating UI elements
     column = [[sg.Text("Alarm Functionality WIP",
                        justification="c", font=(font, 25), pad=(10, 10))],
               [sg.Button("Back", size=(20, 2), pad=(10, 10))]]
-    c_temp = [[sg.Text("Enter Hour (HH):")],
-              [sg.OptionMenu(values=hours_list, default_value="12")],
-              [sg.Text("Enter Minute (MM):")],
-              [sg.OptionMenu(values=min_list, default_value="00")],
-              [sg.Text("Enter Period (AM/PM):")],
-              [sg.OptionMenu(values=["AM", "PM"], default_value="PM")],
-              [sg.Submit(), sg.Cancel()]]
-    lay_temp = [[sg.VPush()],
-                [sg.Column(c_temp, element_justification="c", justification="c")],
-                [sg.VPush()]]
+    c_alarm = [[sg.Text("Hour:"), sg.Text("Minute:"),
+                sg.Text("Period:")],
+               [sg.OptionMenu(values=hours_list, default_value="12", text_color=black),
+                sg.OptionMenu(values=min_list, default_value="00", text_color=black),
+                sg.OptionMenu(values=["AM", "PM"], default_value="PM", text_color=black)],
+               [sg.Submit(), sg.Cancel()]]
+    lay_alarm = [[sg.VPush()],
+                 [sg.Column(c_alarm, element_justification="c", justification="c")],
+                 [sg.VPush()]]
     layout = [[sg.VPush()],
               [sg.Column(column, element_justification="c", justification="c")],
               [sg.VPush()]]
-    win_temp = sg.Window("Input Alarm Values", lay_temp, no_titlebar=bar, modal=True).Finalize()
+    win_temp = sg.Window("Input Alarm Values", lay_alarm, no_titlebar=bar, modal=True).Finalize()
     while True:
         event, values = win_temp.read()
         hour = values[0].strip()
         a_min = values[1].strip()
         period = values[2].strip()
-        # a_min = values[1].strip()
-        # period = values[2].strip()
         if int(hour) <= 12 and int(a_min) <= 59 and (period == "AM" or period == "PM"):
             # win_temp.close()
             print("good")
@@ -103,26 +101,6 @@ def Alarms():
     print(hour)
     print(period)
     print(a_min)
-    '''
-    while True:
-        now = datetime.now()
-
-        current_hour = now.strftime("%I")
-        current_min = now.strftime("%M")
-        current_period = now.strftime("%p")
-        current_sec = now.strftime("%S")
-        if period == current_period:
-            if hour == current_hour:
-                if a_min == current_min:
-                    if "00" == current_sec:
-                        print("Wake Up!")
-                        mixer.init()
-                        mixer.music.load("loud_alarm_clock.mp3")
-                        mixer.music.play()
-                        while mixer.music.get_busy():
-                            time.sleep(1)
-                        break
-    '''
     win_temp.close()
 
     # Create and listen to window
@@ -137,11 +115,7 @@ def Alarms():
         current_hour = now.strftime("%I")
         current_min = now.strftime("%M")
         current_period = now.strftime("%p")
-        """
-        print(hour)
-        print(period)
-        print(a_min)
-        """
+        # Checking time to set off alarm
         if period == current_period:
             if hour == current_hour:
                 if a_min == current_min:
@@ -179,8 +153,7 @@ def Games():
     window.close()
 
 
-# create and run main window
-def main():
+def fred_main():
     logo = "logo2.png"
     # Resizing image for proper display
     im = pl.Image.open(logo)
@@ -214,7 +187,7 @@ def main():
     window.Maximize()
 
     while True:
-        event, values = window.read(timeout = 1)
+        event, values = window.read(timeout=1)
         if event == "Turn Off" or event == sg.WIN_CLOSED:
             break
         elif event == "Alarms":
@@ -223,6 +196,21 @@ def main():
             Games()
 
     window.close()
+
+
+# create and run main window
+def main():
+    while True:
+        with sr.Microphone() as source:
+            audio = r.listen(source)
+            said = ""
+            r.adjust_for_ambient_noise(source)
+            text = r.recognize_google(audio, language='en-IN', show_all=True)
+            said = said.join(text)
+            print("you said " + said)
+        if text == WAKE_WORD:
+            fred_main()
+            break
 
 
 if __name__ == "__main__":
