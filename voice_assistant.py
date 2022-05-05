@@ -11,6 +11,9 @@ import time
 import pyttsx3
 import speech_recognition as sr
 import pytz
+import RPi.GPIO as GPIO
+
+GPIO.setwarnings(False)
 
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 MONTHS = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november",
